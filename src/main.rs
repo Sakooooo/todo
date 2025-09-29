@@ -11,7 +11,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Init(handler::init::InitArgs),
+    Init(handler::init::InitArgs, config::Config),
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Init(args) => handler::init::init(args)?,
+        Commands::Init(args, config) => handler::init::init(args, config)?,
     }
 
     Ok(())

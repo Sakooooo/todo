@@ -1,16 +1,11 @@
-use std::fs::File;
+use std::{fs::File, io::Write};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Directory {
-    name: String,
-    path: String,
-}
-
+// todo, i probably think it'll be better to make this go into directories.toml instead
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
-    task_folder: Option<Vec<Directory>>,
+    pub task_folder: Option<Vec<crate::handler::data::Directory>>,
 }
 
 pub fn read_config() -> Result<Config, Box<dyn std::error::Error>> {
@@ -31,9 +26,15 @@ pub fn read_config() -> Result<Config, Box<dyn std::error::Error>> {
 }
 
 pub fn save_config(config: Config) -> Result<(), Box<dyn std::error::Error>> {
-    // todo config checking
-    //
+    let converted_toml = toml::to_string(&config)?;
+    let config_toml = converted_toml.into_bytes();
 
-    let toml = toml::to_string(&config)?;
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("todo");
+
+    let config_path = xdg_dirs.place_config_file("config.toml")?;
+
+    let mut config_file = File::create(&config_path)?;
+
+    config_file.write_all(&config_toml)?;
     Ok(())
 }
