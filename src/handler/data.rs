@@ -5,4 +5,5 @@ pub struct DirectoryInfo {
     pub name: String,
 }
 
-struct Task {}
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Task {}
