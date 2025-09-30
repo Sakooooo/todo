@@ -5,7 +5,13 @@ use serde::{Deserialize, Serialize};
 // todo, i probably think it'll be better to make this go into directories.toml instead
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
-    pub task_folder: Option<Vec<crate::handler::data::Directory>>,
+    pub task_folder: Option<Vec<Directory>>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Directory {
+    pub name: String,
+    pub path: String,
 }
 
 pub fn read_config() -> Result<Config, Box<dyn std::error::Error>> {
