@@ -11,6 +11,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Initalize a task directory
     Init(handler::init::InitArgs),
 }
 
