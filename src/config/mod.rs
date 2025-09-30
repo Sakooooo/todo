@@ -25,7 +25,7 @@ pub fn read_config() -> Result<Config, Box<dyn std::error::Error>> {
     Ok(data)
 }
 
-pub fn save_config(config: Config) -> Result<(), Box<dyn std::error::Error>> {
+pub fn save_config(config: &mut Config) -> Result<(), Box<dyn std::error::Error>> {
     let converted_toml = toml::to_string(&config)?;
     let config_toml = converted_toml.into_bytes();
 

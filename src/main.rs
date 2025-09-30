@@ -11,17 +11,17 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Init(handler::init::InitArgs, config::Config),
+    Init(handler::init::InitArgs),
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = config::read_config()?;
+    let mut config = config::read_config()?;
     println!("{:?}", config);
 
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Init(args, config) => handler::init::init(args, config)?,
+        Commands::Init(args) => handler::init::init(args, &mut config)?,
     }
 
     Ok(())
