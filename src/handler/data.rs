@@ -9,8 +9,19 @@ pub struct DirectoryInfo {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CategoryInfo {
+    pub version: u64,
     pub id: u64,
     pub latest_todo_id: u64,
+}
+
+impl Default for CategoryInfo {
+    fn default() -> Self {
+        Self {
+            version: 1,
+            id: 0,
+            latest_todo_id: 0,
+        }
+    }
 }
 
 #[derive(Debug, Default, Deserialize, Serialize, Clone, clap::ValueEnum)]

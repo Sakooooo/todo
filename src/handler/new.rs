@@ -116,10 +116,7 @@ pub fn new(args: &NewArgs, config: &mut config::Config) -> Result<(), Box<dyn st
     let category_info_filepath = Path::join(category_path.unwrap(), Path::new("category.json"));
 
     if !category_json_exists {
-        let mut info = data::CategoryInfo {
-            id: 0,
-            latest_todo_id: 0,
-        };
+        let mut info = data::CategoryInfo::default();
 
         let mut highest_id: u64 = 0;
         let mut _category_info: Option<data::CategoryInfo> = None;
