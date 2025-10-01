@@ -17,6 +17,9 @@ enum Commands {
 
     /// List directories or tasks in a directory
     List(handler::list::ListArgs),
+
+    /// Add a task to directory
+    New(handler::new::NewArgs),
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,6 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match &cli.command {
         Commands::Init(args) => handler::init::init(args, &mut config)?,
         Commands::List(args) => handler::list::list(args, &mut config)?,
+        Commands::New(args) => handler::new::new(args, &mut config)?,
     }
 
     Ok(())
