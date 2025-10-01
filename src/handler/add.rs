@@ -7,7 +7,7 @@ use std::{
 use crate::{config, handler::data};
 
 #[derive(Debug, clap::Args)]
-pub struct NewArgs {
+pub struct AddArgs {
     directory: String,
 
     #[arg(short, long)]
@@ -22,12 +22,12 @@ pub struct NewArgs {
 }
 
 #[derive(Debug)]
-enum NewError {
+enum AddError {
     NoDirectories,
     NotFound,
 }
 
-impl std::fmt::Display for NewError {
+impl std::fmt::Display for AddError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::NoDirectories => write!(f, "There are no directories to add to!"),
@@ -36,7 +36,7 @@ impl std::fmt::Display for NewError {
     }
 }
 
-impl std::error::Error for NewError {
+impl std::error::Error for AddError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             _ => None,
@@ -44,7 +44,7 @@ impl std::error::Error for NewError {
     }
 }
 
-pub fn new(args: &NewArgs, config: &mut config::Config) -> Result<(), Box<dyn std::error::Error>> {
+pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn std::error::Error>> {
     let target: String;
 
     if args.category.is_none() {
@@ -54,7 +54,7 @@ pub fn new(args: &NewArgs, config: &mut config::Config) -> Result<(), Box<dyn st
     }
 
     if config.task_folder.is_none() {
-        return Err(Box::new(NewError::NoDirectories));
+        return Err(Box::new(AddError::NoDirectories));
     }
 
     let directories = config.task_folder.as_ref().unwrap();
@@ -71,7 +71,7 @@ pub fn new(args: &NewArgs, config: &mut config::Config) -> Result<(), Box<dyn st
     let target_directory: &config::Directory;
 
     if result.is_none() {
-        return Err(Box::new(NewError::NotFound));
+        return Err(Box::new(AddError::NotFound));
     } else {
         target_directory = result.unwrap();
     }
