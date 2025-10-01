@@ -79,6 +79,7 @@ pub fn new(args: &NewArgs, config: &mut config::Config) -> Result<(), Box<dyn st
     let directory_path = Path::new(&target_directory.path);
     let paths = fs::read_dir(directory_path)?;
 
+    // todo clean this up
     let mut category_path: Option<&Path> = None;
     let mut category_exists = false;
     let mut category_json_exists = false;
