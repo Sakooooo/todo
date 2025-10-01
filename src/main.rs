@@ -21,6 +21,9 @@ enum Commands {
 
     /// Add a task to directory
     Add(handler::add::AddArgs),
+
+    /// Set a task's properties
+    Set(handler::set::SetArgs),
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -33,6 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Init(args) => handler::init::init(args, &mut config)?,
         Commands::List(args) => handler::list::list(args, &mut config)?,
         Commands::Add(args) => handler::add::new(args, &mut config)?,
+        Commands::Set(args) => handler::set::set(args, &mut config)?,
     }
 
     Ok(())

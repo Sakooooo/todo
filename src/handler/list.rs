@@ -3,7 +3,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{config, handler::data};
 use crate::{config, handler::data, helpers};
 
 #[derive(Debug, clap::Args)]
