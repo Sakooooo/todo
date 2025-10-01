@@ -4,6 +4,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+pub mod errors;
+
 pub fn get_todos(
     directory: &config::Directory,
 ) -> Result<Vec<data::Task>, Box<dyn std::error::Error>> {
