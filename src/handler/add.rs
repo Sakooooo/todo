@@ -38,20 +38,16 @@ impl std::fmt::Display for AddError {
 
 impl std::error::Error for AddError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            _ => None,
-        }
+        None
     }
 }
 
 pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn std::error::Error>> {
-    let target: String;
-
-    if args.category.is_none() {
-        target = "inbox".to_string();
+    let target: String = if args.category.is_none() {
+        "inbox".to_string()
     } else {
-        target = args.category.clone().unwrap();
-    }
+        args.category.clone().unwrap()
+    };
 
     if config.task_folder.is_none() {
         return Err(Box::new(AddError::NoDirectories));
@@ -61,20 +57,18 @@ pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn st
 
     let mut result: Option<&config::Directory> = None;
 
-    for directory in directories.into_iter() {
+    for directory in directories.iter() {
         if directory.name == args.directory {
             result = Some(directory);
             break;
         }
     }
 
-    let target_directory: &config::Directory;
-
-    if result.is_none() {
-        return Err(Box::new(AddError::NotFound));
+    let target_directory: &config::Directory = if let Some(value) = result {
+        value
     } else {
-        target_directory = result.unwrap();
-    }
+        return Err(Box::new(AddError::NotFound));
+    };
 
     let directory_path = Path::new(&target_directory.path);
     let paths = fs::read_dir(directory_path)?;
@@ -92,24 +86,22 @@ pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn st
 
         category_info_path_joined = Path::join(unwrapped.as_path(), Path::new("category.json"));
 
-        if unwrapped.is_dir() {
-            if unwrapped.file_name().unwrap().to_string_lossy() == target {
-                // category_path = Some(&unwrapped.as_path());
-                let category_info_path: Option<&Path> = Some(category_info_path_joined.as_path());
-                if category_info_path.unwrap().exists() {
-                    category_exists = true;
-                    category_json_exists = true;
-                };
-                category_path = Some(&unwrapped);
-                break;
-            }
+        if unwrapped.is_dir() && unwrapped.file_name().unwrap().to_string_lossy() == target {
+            // category_path = Some(&unwrapped.as_path());
+            let category_info_path: &Path = category_info_path_joined.as_path();
+            if category_info_path.exists() {
+                category_exists = true;
+                category_json_exists = true;
+            };
+            category_path = Some(&unwrapped);
+            break;
         }
     }
 
     let full_path: String;
     if !category_exists {
         full_path = format!("{}/{}", directory_path.display(), target).to_string();
-        category_path = Some(&Path::new(&full_path));
+        category_path = Some(Path::new(&full_path));
         fs::create_dir(category_path.unwrap())?;
     };
 
@@ -125,7 +117,7 @@ pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn st
             let path = format!("{}/category.json", folder.path);
             let category_path = Path::new(&path);
             if category_path.exists() {
-                let category_data = fs::read_to_string(&category_path)?;
+                let category_data = fs::read_to_string(category_path)?;
                 _category_info = serde_json::from_str(&category_data)?;
 
                 if _category_info.as_ref().unwrap().id > highest_id {

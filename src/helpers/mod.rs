@@ -8,6 +8,7 @@ pub mod errors;
 
 pub fn get_todos(
     directory: &config::Directory,
+    category: String,
 ) -> Result<Vec<data::Task>, Box<dyn std::error::Error>> {
     let target = Path::new(&directory.path);
     let paths = fs::read_dir(target)?;
@@ -28,17 +29,19 @@ pub fn get_todos(
 
     let mut tasks: Vec<data::Task> = vec![];
 
-    for category in valid_directories.into_iter() {
-        let path = Path::new(&category);
+    for found_category in valid_directories.into_iter() {
+        let path = Path::new(&found_category);
         let files = fs::read_dir(path)?;
 
-        for file in files.into_iter() {
-            if file.as_ref().unwrap().file_name().to_str().unwrap() != "category.json"
-                && file.as_ref().unwrap().path().extension().unwrap() == "json"
-            {
-                let json_data = fs::read_to_string(file.unwrap().path())?;
-                let data: data::Task = serde_json::from_str(&json_data)?;
-                tasks.push(data);
+        if found_category.file_name().unwrap().to_string_lossy() == category {
+            for file in files.into_iter() {
+                if file.as_ref().unwrap().file_name().to_str().unwrap() != "category.json"
+                    && file.as_ref().unwrap().path().extension().unwrap() == "json"
+                {
+                    let json_data = fs::read_to_string(file.unwrap().path())?;
+                    let data: data::Task = serde_json::from_str(&json_data)?;
+                    tasks.push(data);
+                }
             }
         }
     }
@@ -99,7 +102,7 @@ pub fn get_category(
 ) -> Result<String, Box<dyn std::error::Error>> {
     let directory_path = Path::new(&directory.path);
 
-    let folders = fs::read_dir(&directory_path)?;
+    let folders = fs::read_dir(directory_path)?;
 
     let mut result: Option<String> = None;
 
@@ -123,4 +126,33 @@ pub fn get_category(
     }
 
     Ok(result.unwrap())
+}
+
+pub fn get_categories(
+    directory: &config::Directory,
+) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let directory_path = Path::new(&directory.path);
+
+    let folders = fs::read_dir(directory_path)?;
+
+    let mut data: Vec<String> = vec![];
+
+    for folder in folders.into_iter() {
+        let json = Path::join(
+            folder.as_ref().unwrap().path().as_path(),
+            Path::new("category.json"),
+        );
+
+        if folder.as_ref().unwrap().metadata()?.is_dir() && json.exists() {
+            let result = folder
+                .as_ref()
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .to_string();
+            data.push(result);
+        };
+    }
+
+    Ok(data)
 }

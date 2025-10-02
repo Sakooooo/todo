@@ -1,9 +1,11 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
+use crate::{
+    config,
+    helpers::{self},
 };
 
-use crate::{config, handler::data, helpers};
+const STYLE: anstyle::Style = anstyle::Style::new()
+    .bold()
+    .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::White)));
 
 #[derive(Debug, clap::Args)]
 pub struct ListArgs {
@@ -27,9 +29,7 @@ impl std::fmt::Display for ListErrors {
 
 impl std::error::Error for ListErrors {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            _ => None,
-        }
+        None
     }
 }
 pub fn list(
@@ -50,27 +50,33 @@ pub fn list(
             return Err(Box::new(ListErrors::DoesntExist));
         }
 
-        let todos = helpers::get_todos(directory.unwrap())?;
-
-        println!("{}", directory.unwrap().name);
-        for todo in todos.into_iter() {
-            println!("  {} {} {}", todo.id, todo.state, todo.task);
+        println!("{STYLE}{}{STYLE:#}", directory.unwrap().name);
+        let categories = helpers::get_categories(directory.unwrap())?;
+        for category in categories.into_iter() {
+            let todos = helpers::get_todos(directory.unwrap(), category.clone())?;
+            println!("  {STYLE}{}{STYLE:#}", category);
+            for todo in todos.into_iter() {
+                println!("      {} {} {}", todo.id, todo.state, todo.task);
+            }
         }
-    } else {
-        if config.task_folder.is_some() {
-            println!("Folders:");
-            for folder in config.task_folder.as_ref().unwrap() {
-                println!("  {}", folder.name);
-                let todos = helpers::get_todos(folder)?;
+    } else if config.task_folder.is_some() {
+        println!("{STYLE}Folders:{STYLE:#}");
+        for folder in config.task_folder.as_ref().unwrap() {
+            println!("  {STYLE}{}{STYLE:#}", folder.name);
+            let categories = helpers::get_categories(folder)?;
+            for category in categories.into_iter() {
+                println!("      {STYLE}{}{STYLE:#}", category);
+                // let path = Path::new(&get_category(folder, category.clone())?);
+                let todos = helpers::get_todos(folder, category)?;
                 for todo in todos.into_iter() {
-                    println!("      {} {} {}", todo.id, todo.state, todo.task);
+                    println!("          {} {} {}", todo.id, todo.state, todo.task);
                 }
             }
-        } else {
-            println!("You have no folders!");
-            println!("tip: Set one up with todo init ./todo");
-            return Err(Box::new(ListErrors::NoFolders));
-        };
+        }
+    } else {
+        println!("You have no folders!");
+        println!("tip: Set one up with todo init ./todo");
+        return Err(Box::new(ListErrors::NoFolders));
     };
     Ok(())
 }

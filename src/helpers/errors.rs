@@ -19,8 +19,6 @@ impl std::fmt::Display for CommonErrors {
 
 impl std::error::Error for CommonErrors {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            _ => None,
-        }
+        None
     }
 }

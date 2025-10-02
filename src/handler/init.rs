@@ -28,9 +28,7 @@ impl std::fmt::Display for InitError {
 
 impl std::error::Error for InitError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            _ => None,
-        }
+        None
     }
 }
 
