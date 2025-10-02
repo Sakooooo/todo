@@ -5,6 +5,7 @@ use std::{
 };
 
 pub mod errors;
+pub mod styles;
 
 pub fn get_todos(
     directory: &config::Directory,

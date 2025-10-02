@@ -6,6 +6,7 @@ use std::{
 use crate::{
     config::{self, save_config},
     handler::data,
+    helpers::styles::*,
 };
 
 #[derive(Debug, clap::Args)]
@@ -79,7 +80,10 @@ pub fn init(
 
     save_config(config)?;
 
-    println!("Created task folder {} at {}", name, path);
+    println!(
+        "created task folder {FOLDER}{BOLD}{}{BOLD:#}{FOLDER:#} at {BOLD}{}{BOLD:#}",
+        name, path
+    );
 
     Ok(())
 }

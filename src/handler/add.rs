@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use crate::{config, handler::data};
+use crate::{config, handler::data, helpers::styles::*};
 
 #[derive(Debug, clap::Args)]
 pub struct AddArgs {
@@ -133,6 +133,10 @@ pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn st
         let mut category_info_file = File::create(&category_info_filepath)?;
 
         category_info_file.write_all(&info_json.into_bytes())?;
+        println!(
+            "Created category {CATEGORY}{}{CATEGORY:#} in {FOLDER}{}{FOLDER:#} at {BOLD}{}{BOLD:#}",
+            target, target_directory.name, target_directory.path
+        );
     }
 
     let category_info_content = fs::read_to_string(&category_info_filepath)?;
@@ -158,6 +162,11 @@ pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn st
     let mut category_info_file = File::create(category_info_filepath)?;
     let category_info_json = serde_json::to_string_pretty(&category_info_result)?;
     category_info_file.write_all(&category_info_json.into_bytes())?;
+
+    println!(
+        "Created task with ID {BOLD}{}{BOLD:#} in {CATEGORY}{}{CATEGORY:#} of {FOLDER}{}{FOLDER:#} at {BOLD}{}{BOLD:#}",
+        task.id, target, args.directory, target_directory.path
+    );
 
     Ok(())
 }

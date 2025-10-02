@@ -1,6 +1,6 @@
 use std::{io::Write, path::Path};
 
-use crate::{config, handler::data, helpers};
+use crate::{config, handler::data, helpers, helpers::styles::*};
 
 #[derive(Debug, clap::Args)]
 pub struct SetArgs {
@@ -58,6 +58,11 @@ pub fn set(args: &SetArgs, config: &mut config::Config) -> Result<(), Box<dyn st
         .open(output_path)?;
 
     file.write_all(updated_task_json.as_bytes())?;
+
+    println!(
+        "Updated item ID {BOLD}{}{BOLD:#} in category {CATEGORY}{}{CATEGORY:#} of folder {FOLDER}{}{FOLDER:#}.",
+        task.id, args.category, args.directory,
+    );
 
     Ok(())
 }

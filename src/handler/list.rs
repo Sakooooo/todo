@@ -1,12 +1,7 @@
 use crate::{
     config,
-    helpers::{self},
+    helpers::{self, styles::BOLD},
 };
-
-const STYLE: anstyle::Style = anstyle::Style::new()
-    .bold()
-    .fg_color(Some(anstyle::Color::Ansi(anstyle::AnsiColor::White)));
-
 #[derive(Debug, clap::Args)]
 pub struct ListArgs {
     folder: Option<String>,
@@ -50,22 +45,22 @@ pub fn list(
             return Err(Box::new(ListErrors::DoesntExist));
         }
 
-        println!("{STYLE}{}{STYLE:#}", directory.unwrap().name);
+        println!("{BOLD}{}{BOLD:#}", directory.unwrap().name);
         let categories = helpers::get_categories(directory.unwrap())?;
         for category in categories.into_iter() {
             let todos = helpers::get_todos(directory.unwrap(), category.clone())?;
-            println!("  {STYLE}{}{STYLE:#}", category);
+            println!("  {BOLD}{}{BOLD:#}", category);
             for todo in todos.into_iter() {
                 println!("      {} {} {}", todo.id, todo.state, todo.task);
             }
         }
     } else if config.task_folder.is_some() {
-        println!("{STYLE}Folders:{STYLE:#}");
+        println!("{BOLD}Folders:{BOLD:#}");
         for folder in config.task_folder.as_ref().unwrap() {
-            println!("  {STYLE}{}{STYLE:#}", folder.name);
+            println!("  {BOLD}{}{BOLD:#}", folder.name);
             let categories = helpers::get_categories(folder)?;
             for category in categories.into_iter() {
-                println!("      {STYLE}{}{STYLE:#}", category);
+                println!("      {BOLD}{}{BOLD:#}", category);
                 // let path = Path::new(&get_category(folder, category.clone())?);
                 let todos = helpers::get_todos(folder, category)?;
                 for todo in todos.into_iter() {
