@@ -57,6 +57,7 @@ enum Commands {
     Init(handler::init::InitArgs),
 
     /// List directories or tasks in a directory
+    #[clap(alias = "ls")]
     List(handler::list::ListArgs),
 
     /// Add a task to directory
