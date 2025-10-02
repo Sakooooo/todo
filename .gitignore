@@ -1,4 +1,5 @@
 /target
 .direnv
+/result
 # i test the cli in this directory
 /temp

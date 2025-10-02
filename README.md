@@ -63,5 +63,19 @@ Updated item ID 1 in category inbox of folder work.
 ## Installation
 <details>
 <summary>Nix</summary>
-TODO
+
+Add this repo to your flake inputs.
+```nix
+inputs = {
+    todo.url = "github:Sakooooo/todo";
+};
+```
+
+Then call the package from `inputs`.
+```nix
+users.users.myself.packages = [
+    inputs.todo.packages.${system}.default
+];
+```
+
 </details>
