@@ -1,4 +1,4 @@
-use crate::{config, handler::data};
+use crate::{config, handler::data, helpers::errors::CommonErrors};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -44,4 +44,83 @@ pub fn get_todos(
     }
 
     Ok(tasks)
+}
+
+// todo need to make category struct to make this better
+pub fn get_category_todos(
+    category_path: String,
+) -> Result<Vec<data::Task>, Box<dyn std::error::Error>> {
+    let path = Path::new(&category_path);
+    let files = fs::read_dir(path)?;
+
+    let mut tasks: Vec<data::Task> = vec![];
+
+    for file in files.into_iter() {
+        if file.as_ref().unwrap().file_name().to_str().unwrap() != "category.json"
+            && file.as_ref().unwrap().path().extension().unwrap() == "json"
+        {
+            let json_data = fs::read_to_string(file.unwrap().path())?;
+            let data: data::Task = serde_json::from_str(&json_data)?;
+            tasks.push(data);
+        }
+    }
+
+    Ok(tasks)
+}
+
+pub fn get_directory(
+    config: &config::Config,
+    target: String,
+) -> Result<&config::Directory, Box<dyn std::error::Error>> {
+    if config.task_folder.is_none() {
+        return Err(Box::new(CommonErrors::NoFolders));
+    }
+
+    let directories = config.task_folder.as_ref().unwrap();
+
+    let mut target_directory: Option<&config::Directory> = None;
+
+    for directory in directories {
+        if directory.name == target {
+            target_directory = Some(directory);
+        }
+    }
+
+    if target_directory.is_none() {
+        return Err(Box::new(CommonErrors::FolderNotFound));
+    }
+
+    Ok(target_directory.unwrap())
+}
+
+pub fn get_category(
+    directory: &config::Directory,
+    target: String,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let directory_path = Path::new(&directory.path);
+
+    let folders = fs::read_dir(&directory_path)?;
+
+    let mut result: Option<String> = None;
+
+    for folder in folders.into_iter() {
+        if folder.as_ref().unwrap().metadata()?.is_dir()
+            && folder
+                .as_ref()
+                .unwrap()
+                .path()
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                == target
+        {
+            result = Some(folder.unwrap().path().to_string_lossy().to_string());
+        };
+    }
+
+    if result.is_none() {
+        return Err(Box::new(CommonErrors::CategoryNotFound));
+    }
+
+    Ok(result.unwrap())
 }

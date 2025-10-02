@@ -1,3 +1,5 @@
+use std::{fs::File, io::Write, path::Path};
+
 use crate::{config, handler::data, helpers};
 
 #[derive(Debug, clap::Args)]
@@ -5,33 +7,26 @@ pub struct SetArgs {
     directory: String,
     category: String,
     id: u64,
-    state: Option<data::TaskState>,
+
+    #[arg(short, long)]
     task: Option<String>,
+
+    #[arg(short, long)]
+    state: Option<data::TaskState>,
 }
 
-// todo
-// helper func for getting categories
 pub fn set(args: &SetArgs, config: &mut config::Config) -> Result<(), Box<dyn std::error::Error>> {
-    if config.task_folder.is_none() {
-        return Err(Box::new(helpers::errors::CommonErrors::NoFolders));
-    }
+    let target_directory = helpers::get_directory(config, args.directory.clone())?;
 
-    let directories = config.task_folder.as_ref().unwrap();
+    dbg!(&target_directory);
 
-    let mut target_directory: Option<&config::Directory> = None;
+    let category = helpers::get_category(target_directory, args.category.clone())?;
 
-    for directory in directories {
-        if directory.name == args.directory {
-            target_directory = Some(directory);
-            break;
-        }
-    }
+    dbg!(&category);
 
-    if target_directory.is_none() {
-        return Err(Box::new(helpers::errors::CommonErrors::FolderNotFound));
-    }
+    let todos = helpers::get_category_todos(category.clone())?;
 
-    let todos = helpers::get_todos(target_directory.unwrap())?;
+    dbg!(&todos);
 
     let mut target_task: Option<data::Task> = None;
 
@@ -45,6 +40,28 @@ pub fn set(args: &SetArgs, config: &mut config::Config) -> Result<(), Box<dyn st
     if target_task.is_none() {
         return Err(Box::new(helpers::errors::CommonErrors::TaskNotFound));
     }
+
+    dbg!(&target_task);
+
+    let mut task = target_task.unwrap();
+
+    if args.state.is_some() {
+        task.state = args.state.clone().unwrap();
+    }
+
+    if args.task.is_some() {
+        task.task = args.task.clone().unwrap();
+    }
+
+    let filename = format!("{}.json", task.id);
+    let output_path = Path::join(Path::new(&category), Path::new(&filename));
+
+    let updated_task_json = serde_json::to_string_pretty(&task)?;
+    dbg!(&updated_task_json);
+
+    let mut file = std::fs::OpenOptions::new().write(true).open(output_path)?;
+
+    file.write_all(updated_task_json.as_bytes())?;
 
     Ok(())
 }

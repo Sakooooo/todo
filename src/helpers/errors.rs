@@ -2,6 +2,7 @@
 pub enum CommonErrors {
     NoFolders,
     FolderNotFound,
+    CategoryNotFound,
     TaskNotFound,
 }
 
@@ -10,6 +11,7 @@ impl std::fmt::Display for CommonErrors {
         match self {
             Self::NoFolders => write!(f, "You have no folders!"),
             Self::TaskNotFound => write!(f, "Could not find task!"),
+            Self::CategoryNotFound => write!(f, "Could not find category!"),
             Self::FolderNotFound => write!(f, "Could not find folder!"),
         }
     }
