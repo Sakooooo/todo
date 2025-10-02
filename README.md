@@ -50,6 +50,14 @@ Folders:
 
 ## Updating tasks
 ```
+~/todos> todo set work inbox 2 -t "clock out"
+Updated item ID 2 in category inbox of folder work.
+~/todos> todo set me goals 1 -s done
+Updated item ID 1 in category goals of folder me.
+~/todos> todo set me inbox 1 -s in-progress
+Updated item ID 1 in category goals of folder me.
+~/todos> todo set work inbox 1 -s done
+Updated item ID 1 in category inbox of folder work.
 ```
 
 ## Installation
