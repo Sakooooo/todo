@@ -28,7 +28,7 @@ enum Commands {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut config = config::read_config()?;
-    println!("{:?}", config);
+    // println!("{:?}", config);
 
     let cli = Cli::parse();
 
