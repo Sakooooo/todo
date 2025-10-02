@@ -67,7 +67,10 @@ Updated item ID 1 in category inbox of folder work.
 Add this repo to your flake inputs.
 ```nix
 inputs = {
-    todo.url = "github:Sakooooo/todo";
+    todo = { 
+        url = "github:Sakooooo/todo";
+        inputs.nixpkgs.follows = "nixpkgs"; 
+    };
 };
 ```
 
