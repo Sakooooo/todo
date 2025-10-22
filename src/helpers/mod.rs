@@ -7,6 +7,8 @@ use std::{
 pub mod errors;
 pub mod styles;
 
+pub const SCHEMA_VERSION: u64 = 1;
+
 pub fn get_todos(
     directory: &config::Directory,
     category: String,
@@ -46,6 +48,10 @@ pub fn get_todos(
             }
         }
     }
+
+    // This feels wrong...
+    tasks.sort_by(|a, b| b.id.cmp(&a.id));
+    tasks.reverse();
 
     Ok(tasks)
 }

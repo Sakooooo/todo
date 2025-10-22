@@ -5,8 +5,8 @@ use std::{
 
 use crate::{
     config::{self, save_config},
-    handler::data,
-    helpers::styles::*,
+    handler::data::{self, DirectoryInfo},
+    helpers::{self, styles::*},
 };
 
 #[derive(Debug, clap::Args)]
@@ -65,7 +65,10 @@ pub fn init(
         path: path.clone(),
     };
 
-    let info = data::DirectoryInfo { name: name.clone() };
+    let info: DirectoryInfo = data::DirectoryInfo {
+        version: helpers::SCHEMA_VERSION,
+        name: name.clone(),
+    };
     let info_json = serde_json::to_string_pretty(&info)?;
 
     if config.task_folder.is_some() {

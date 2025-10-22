@@ -2,27 +2,19 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DirectoryInfo {
+    pub version: u64,
     pub name: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct CategoryInfo {
-    pub version: u64,
     pub id: u64,
     pub latest_todo_id: u64,
 }
 
-impl Default for CategoryInfo {
-    fn default() -> Self {
-        Self {
-            version: 1,
-            id: 0,
-            latest_todo_id: 0,
-        }
-    }
-}
-
-#[derive(Debug, Default, Deserialize, Serialize, Clone, clap::ValueEnum)]
+#[derive(
+    Debug, Default, Deserialize, Serialize, Clone, clap::ValueEnum, PartialEq, PartialOrd, Ord, Eq,
+)]
 #[serde(rename_all = "kebab-case")]
 pub enum TaskState {
     Done,
@@ -50,7 +42,7 @@ impl std::fmt::Display for TaskState {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Task {
     pub id: u64,
     pub state: TaskState,
