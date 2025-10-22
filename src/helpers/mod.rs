@@ -79,14 +79,14 @@ pub fn get_category_todos(
 }
 
 pub fn get_directory(
-    config: &config::Config,
+    directory_config: &config::DirectoryConfig,
     target: String,
 ) -> Result<&config::Directory, Box<dyn std::error::Error>> {
-    if config.task_folder.is_none() {
+    if directory_config.task_folder.is_none() {
         return Err(Box::new(CommonErrors::NoFolders));
     }
 
-    let directories = config.task_folder.as_ref().unwrap();
+    let directories = directory_config.task_folder.as_ref().unwrap();
 
     let mut target_directory: Option<&config::Directory> = None;
 

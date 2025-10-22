@@ -29,12 +29,12 @@ impl std::error::Error for ListErrors {
 }
 pub fn list(
     args: &ListArgs,
-    config: &mut config::Config,
+    directory_config: &mut config::DirectoryConfig,
 ) -> Result<(), Box<dyn std::error::Error>> {
     if args.folder.is_some() {
         let mut directory: Option<&config::Directory> = None;
 
-        for folder in config.task_folder.as_ref().unwrap() {
+        for folder in directory_config.task_folder.as_ref().unwrap() {
             if &folder.name == args.folder.as_ref().unwrap() {
                 directory = Some(folder);
                 break;
@@ -54,9 +54,9 @@ pub fn list(
                 println!("      {} {} {}", todo.id, todo.state, todo.task);
             }
         }
-    } else if config.task_folder.is_some() {
+    } else if directory_config.task_folder.is_some() {
         println!("{BOLD}Folders:{BOLD:#}");
-        for folder in config.task_folder.as_ref().unwrap() {
+        for folder in directory_config.task_folder.as_ref().unwrap() {
             println!("  {BOLD}{}{BOLD:#}", folder.name);
             let categories = helpers::get_categories(folder)?;
             for category in categories.into_iter() {

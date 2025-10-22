@@ -13,8 +13,11 @@ pub struct RmArgs {
     id: u64,
 }
 
-pub fn rm(args: &RmArgs, config: &mut config::Config) -> Result<(), Box<dyn std::error::Error>> {
-    let target_directory = helpers::get_directory(config, args.directory.clone())?;
+pub fn rm(
+    args: &RmArgs,
+    directory_config: &mut config::DirectoryConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let target_directory = helpers::get_directory(directory_config, args.directory.clone())?;
 
     let category = helpers::get_category(target_directory, args.category.clone())?;
 

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 // todo, i probably think it'll be better to make this go into directories.toml instead
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Config {
+pub struct DirectoryConfig {
     pub task_folder: Option<Vec<Directory>>,
 }
 
@@ -14,33 +14,38 @@ pub struct Directory {
     pub path: String,
 }
 
-pub fn read_config() -> Result<Config, Box<dyn std::error::Error>> {
+pub fn read_directory_config() -> Result<DirectoryConfig, Box<dyn std::error::Error>> {
     let xdg_dirs = xdg::BaseDirectories::with_prefix("todo");
 
-    let config_path = xdg_dirs.place_config_file("config.toml")?;
+    let directory_config_path = xdg_dirs.place_config_file("directories.toml")?;
 
-    if !config_path.is_file() {
-        println!("Creating config at {}", config_path.to_str().unwrap());
-        File::create(&config_path)?;
+    if !directory_config_path.is_file() {
+        println!(
+            "Creating directory config at {}",
+            directory_config_path.to_str().unwrap()
+        );
+        File::create(&directory_config_path)?;
     }
 
-    let config = std::fs::read_to_string(&config_path)?;
+    let directory_config = std::fs::read_to_string(&directory_config_path)?;
 
-    let data: Config = toml::from_str(&config)?;
+    let data: DirectoryConfig = toml::from_str(&directory_config)?;
 
     Ok(data)
 }
 
-pub fn save_config(config: &mut Config) -> Result<(), Box<dyn std::error::Error>> {
-    let converted_toml = toml::to_string(&config)?;
+pub fn save_directory_config(
+    directory_config: &mut DirectoryConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let converted_toml = toml::to_string(&directory_config)?;
     let config_toml = converted_toml.into_bytes();
 
     let xdg_dirs = xdg::BaseDirectories::with_prefix("todo");
 
-    let config_path = xdg_dirs.place_config_file("config.toml")?;
+    let directory_config_path = xdg_dirs.place_config_file("directories.toml")?;
 
-    let mut config_file = File::create(&config_path)?;
+    let mut directory_config_file = File::create(&directory_config_path)?;
 
-    config_file.write_all(&config_toml)?;
+    directory_config_file.write_all(&config_toml)?;
     Ok(())
 }

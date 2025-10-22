@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anstyle = "1.0.13"
+chrono = { version = "0.4.42", features = ["serde"] }
 #chrono = "0.4.42"
 clap = { version = "4.5.48", features = ["derive"] }
 clap_derive = "4.5.47"

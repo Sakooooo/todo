@@ -4,6 +4,8 @@ use std::{
     path::Path,
 };
 
+use chrono::{DateTime, Local};
+
 use crate::{config, handler::data, helpers::styles::*};
 
 #[derive(Debug, clap::Args)]
@@ -19,6 +21,12 @@ pub struct AddArgs {
     #[arg(short, long)]
     #[clap(default_value_t, value_enum)]
     status: data::TaskState,
+
+    #[arg(short, long)]
+    deadline: Option<DateTime<Local>>,
+
+    #[arg(short, long)]
+    scheduled: Option<DateTime<Local>>,
 }
 
 #[derive(Debug)]
@@ -42,18 +50,24 @@ impl std::error::Error for AddError {
     }
 }
 
-pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn std::error::Error>> {
+pub fn new(
+    args: &AddArgs,
+    directory_config: &mut config::DirectoryConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let date = chrono::Local::now();
+    println!("{}", date.time());
+
     let target: String = if args.category.is_none() {
         "inbox".to_string()
     } else {
         args.category.clone().unwrap()
     };
 
-    if config.task_folder.is_none() {
+    if directory_config.task_folder.is_none() {
         return Err(Box::new(AddError::NoDirectories));
     }
 
-    let directories = config.task_folder.as_ref().unwrap();
+    let directories = directory_config.task_folder.as_ref().unwrap();
 
     let mut result: Option<&config::Directory> = None;
 
@@ -113,7 +127,7 @@ pub fn new(args: &AddArgs, config: &mut config::Config) -> Result<(), Box<dyn st
         let mut highest_id: u64 = 0;
         let mut _category_info: Option<data::CategoryInfo> = None;
 
-        for folder in config.task_folder.as_ref().unwrap() {
+        for folder in directory_config.task_folder.as_ref().unwrap() {
             let path = format!("{}/category.json", folder.path);
             let category_path = Path::new(&path);
             if category_path.exists() {

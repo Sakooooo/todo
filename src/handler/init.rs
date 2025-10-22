@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    config::{self, save_config},
+    config::{self, save_directory_config},
     handler::data::{self, DirectoryInfo},
     helpers::{self, styles::*},
 };
@@ -35,7 +35,7 @@ impl std::error::Error for InitError {
 
 pub fn init(
     args: &InitArgs,
-    config: &mut config::Config,
+    directory_config: &mut config::DirectoryConfig,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let filepath = Path::new(&args.directory);
 
@@ -71,17 +71,21 @@ pub fn init(
     };
     let info_json = serde_json::to_string_pretty(&info)?;
 
-    if config.task_folder.is_some() {
-        config.task_folder.as_mut().unwrap().push(directory);
+    if directory_config.task_folder.is_some() {
+        directory_config
+            .task_folder
+            .as_mut()
+            .unwrap()
+            .push(directory);
     } else {
-        config.task_folder = Some(vec![directory]);
+        directory_config.task_folder = Some(vec![directory]);
     }
 
     let mut directory_info = std::fs::File::create(todoinfo)?;
 
     directory_info.write_all(&info_json.into_bytes())?;
 
-    save_config(config)?;
+    save_directory_config(directory_config)?;
 
     println!(
         "created task folder {FOLDER}{BOLD}{}{BOLD:#}{FOLDER:#} at {BOLD}{}{BOLD:#}",

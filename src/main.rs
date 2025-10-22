@@ -71,17 +71,17 @@ enum Commands {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut config = config::read_config()?;
+    let mut directory_config = config::read_directory_config()?;
     // println!("{:?}", config);
 
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Init(args) => handler::init::init(args, &mut config)?,
-        Commands::List(args) => handler::list::list(args, &mut config)?,
-        Commands::Add(args) => handler::add::new(args, &mut config)?,
-        Commands::Set(args) => handler::set::set(args, &mut config)?,
-        Commands::Rm(args) => handler::rm::rm(args, &mut config)?,
+        Commands::Init(args) => handler::init::init(args, &mut directory_config)?,
+        Commands::List(args) => handler::list::list(args, &mut directory_config)?,
+        Commands::Add(args) => handler::add::new(args, &mut directory_config)?,
+        Commands::Set(args) => handler::set::set(args, &mut directory_config)?,
+        Commands::Rm(args) => handler::rm::rm(args, &mut directory_config)?,
     }
 
     Ok(())
