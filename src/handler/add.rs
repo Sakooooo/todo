@@ -1,12 +1,18 @@
 use std::{
     fs::{self, File},
     io::Write,
+    iter,
     path::Path,
 };
 
 use chrono::{DateTime, Local};
+use toml::value::Date;
 
-use crate::{config, handler::data, helpers::styles::*};
+use crate::{
+    config,
+    handler::data,
+    helpers::{errors::CommonErrors, styles::*},
+};
 
 #[derive(Debug, clap::Args)]
 pub struct AddArgs {
@@ -22,11 +28,11 @@ pub struct AddArgs {
     #[clap(default_value_t, value_enum)]
     status: data::TaskState,
 
-    #[arg(short, long)]
-    deadline: Option<DateTime<Local>>,
+    #[arg(short, long, value_delimiter = ' ', num_args = 1..4)]
+    deadline: Option<Vec<String>>,
 
-    #[arg(short, long)]
-    scheduled: Option<DateTime<Local>>,
+    #[arg(short = 'S', long, value_delimiter = ' ', num_args = 1..4)]
+    scheduled: Option<Vec<String>>,
 }
 
 #[derive(Debug)]
@@ -156,6 +162,14 @@ pub fn new(
     let category_info_content = fs::read_to_string(&category_info_filepath)?;
     let mut category_info_result: data::CategoryInfo =
         serde_json::from_str(&category_info_content)?;
+
+    if let Some(deadline) = &args.deadline {
+        dbg!(deadline);
+        let date = chrono::DateTime::parse_from_str(&deadline[0], "%Y-%m-%d")?;
+        println!("test");
+        let time = chrono::DateTime::parse_from_str(&deadline[1], "%H:%S")?.naive_local();
+        dbg!(date, time);
+    };
 
     let task = data::Task {
         id: category_info_result.latest_todo_id + 1,
