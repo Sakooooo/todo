@@ -47,4 +47,5 @@ pub struct Task {
     pub id: u64,
     pub state: TaskState,
     pub task: String,
+    pub deadline: Option<chrono::DateTime<chrono::Utc>>,
 }

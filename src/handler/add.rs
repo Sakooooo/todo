@@ -5,7 +5,7 @@ use std::{
     path::Path,
 };
 
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Timelike};
 use toml::value::Date;
 
 use crate::{
@@ -163,18 +163,60 @@ pub fn new(
     let mut category_info_result: data::CategoryInfo =
         serde_json::from_str(&category_info_content)?;
 
-    if let Some(deadline) = &args.deadline {
-        dbg!(deadline);
-        let date = chrono::DateTime::parse_from_str(&deadline[0], "%Y-%m-%d")?;
-        println!("test");
-        let time = chrono::DateTime::parse_from_str(&deadline[1], "%H:%S")?.naive_local();
-        dbg!(date, time);
+    let deadline = if let Some(deadline) = &args.deadline {
+        let naive_date: Option<NaiveDate> = if let Some(targetdate) = deadline.first() {
+            Some(chrono::NaiveDate::parse_from_str(targetdate, "%Y-%m-%d")?)
+        } else {
+            None
+        };
+
+        let naive_time: Option<NaiveTime> = if let Some(targettime) = deadline.get(1) {
+            Some(chrono::NaiveTime::parse_from_str(targettime, "%H:%M")?)
+        } else {
+            None
+        };
+
+        let naive_date: Option<NaiveDateTime> =
+            if let (Some(time), Some(date)) = (naive_time, naive_date) {
+                Some(date.and_time(time))
+            } else if let Some(date) = naive_date {
+                Some(date.and_hms_opt(0, 0, 0).unwrap())
+            } else {
+                None
+            };
+
+        let local_time: Option<DateTime<Local>> = if let Some(date) = naive_date {
+            Some(Local.from_local_datetime(&date).unwrap())
+        } else {
+            None
+        };
+
+        if let (Some(otherdate), Some(othertime)) = (naive_date, naive_time) {
+            let to_utc = otherdate
+                .and_hms_opt(othertime.hour(), othertime.minute(), othertime.second())
+                .unwrap();
+            Some(DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+                to_utc,
+                chrono::Utc,
+            ))
+        } else if let Some(otherdate) = naive_date {
+            let to_utc = otherdate.and_hms_opt(0, 0, 0).unwrap();
+            Some(DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+                to_utc,
+                chrono::Utc,
+            ))
+        } else {
+            None
+        }
+    } else {
+        None
     };
 
     let task = data::Task {
         id: category_info_result.latest_todo_id + 1,
         state: args.status.clone(),
         task: args.task.clone(),
+        deadline,
     };
     let task_json = serde_json::to_string_pretty(&task.clone())?;
 
