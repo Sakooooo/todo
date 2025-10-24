@@ -5,7 +5,7 @@ use std::{
     path::Path,
 };
 
-use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Timelike};
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Timelike, Utc};
 use toml::value::Date;
 
 use crate::{
@@ -179,39 +179,17 @@ pub fn new(
         let naive_date: Option<NaiveDateTime> =
             if let (Some(time), Some(date)) = (naive_time, naive_date) {
                 Some(date.and_time(time))
-            } else if let Some(date) = naive_date {
-                Some(date.and_hms_opt(0, 0, 0).unwrap())
             } else {
-                None
+                naive_date.map(|date| date.and_hms_opt(0, 0, 0).unwrap())
             };
 
-        let local_time: Option<DateTime<Local>> = if let Some(date) = naive_date {
-            Some(Local.from_local_datetime(&date).unwrap())
-        } else {
-            None
-        };
+        let local_date: Option<DateTime<Local>> =
+            naive_date.map(|date| Local.from_local_datetime(&date).unwrap());
 
-        if let (Some(otherdate), Some(othertime)) = (naive_date, naive_time) {
-            let to_utc = otherdate
-                .and_hms_opt(othertime.hour(), othertime.minute(), othertime.second())
-                .unwrap();
-            Some(DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-                to_utc,
-                chrono::Utc,
-            ))
-        } else if let Some(otherdate) = naive_date {
-            let to_utc = otherdate.and_hms_opt(0, 0, 0).unwrap();
-            Some(DateTime::<chrono::Utc>::from_naive_utc_and_offset(
-                to_utc,
-                chrono::Utc,
-            ))
-        } else {
-            None
-        }
+        local_date.map(|date| date.to_utc())
     } else {
         None
     };
-
     let task = data::Task {
         id: category_info_result.latest_todo_id + 1,
         state: args.status.clone(),
