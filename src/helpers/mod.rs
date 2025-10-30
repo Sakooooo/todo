@@ -7,7 +7,7 @@ use std::{
 pub mod errors;
 pub mod styles;
 
-pub const SCHEMA_VERSION: u64 = 1;
+pub const SCHEMA_VERSION: f64 = 1.0;
 
 pub fn get_todos(
     directory: &config::Directory,

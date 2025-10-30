@@ -76,7 +76,20 @@ fn make_time(
         let local_date: Option<DateTime<Local>> =
             naive_date.map(|date| Local.from_local_datetime(&date).unwrap());
 
-        Ok(local_date.map(|date| date.to_utc()))
+        let utc_date = local_date.map(|date| date.to_utc());
+
+        let result = if let Some(date) = utc_date {
+            if naive_time.is_none() {
+                let blank_time = NaiveTime::from_hms_opt(0, 0, 0).unwrap();
+                let result = date.with_time(blank_time).unwrap();
+                Some(result)
+            } else {
+                utc_date
+            }
+        } else {
+            None
+        };
+        Ok(result)
     } else {
         Ok(None)
     }

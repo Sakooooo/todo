@@ -7,3 +7,9 @@ pub const CATEGORY: Style = Style::new()
 pub const FOLDER: Style = Style::new()
     .bold()
     .fg_color(Some(Color::Ansi(AnsiColor::Cyan)));
+pub const DEADLINE: Style = Style::new()
+    .bold()
+    .fg_color(Some(Color::Ansi(AnsiColor::BrightRed)));
+pub const SCHEDULED: Style = Style::new()
+    .bold()
+    .fg_color(Some(Color::Ansi(AnsiColor::Blue)));
