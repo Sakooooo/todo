@@ -1,18 +1,12 @@
 use std::{
     fs::{self, File},
     io::Write,
-    iter,
     path::Path,
 };
 
-use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Timelike, Utc};
-use toml::value::Date;
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 
-use crate::{
-    config,
-    handler::data,
-    helpers::{errors::CommonErrors, styles::*},
-};
+use crate::{config, handler::data, helpers::styles::*};
 
 #[derive(Debug, clap::Args)]
 pub struct AddArgs {
@@ -53,6 +47,38 @@ impl std::fmt::Display for AddError {
 impl std::error::Error for AddError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
+    }
+}
+
+fn make_time(
+    time_vec: &Option<Vec<String>>,
+) -> Result<Option<DateTime<Utc>>, Box<dyn std::error::Error>> {
+    if let Some(time) = time_vec {
+        let naive_date: Option<NaiveDate> = if let Some(targetdate) = time.first() {
+            Some(chrono::NaiveDate::parse_from_str(targetdate, "%Y-%m-%d")?)
+        } else {
+            None
+        };
+
+        let naive_time: Option<NaiveTime> = if let Some(targettime) = time.get(1) {
+            Some(chrono::NaiveTime::parse_from_str(targettime, "%H:%M")?)
+        } else {
+            None
+        };
+
+        let naive_date: Option<NaiveDateTime> =
+            if let (Some(time), Some(date)) = (naive_time, naive_date) {
+                Some(date.and_time(time))
+            } else {
+                naive_date.map(|date| date.and_hms_opt(0, 0, 0).unwrap())
+            };
+
+        let local_date: Option<DateTime<Local>> =
+            naive_date.map(|date| Local.from_local_datetime(&date).unwrap());
+
+        Ok(local_date.map(|date| date.to_utc()))
+    } else {
+        Ok(None)
     }
 }
 
@@ -163,38 +189,15 @@ pub fn new(
     let mut category_info_result: data::CategoryInfo =
         serde_json::from_str(&category_info_content)?;
 
-    let deadline = if let Some(deadline) = &args.deadline {
-        let naive_date: Option<NaiveDate> = if let Some(targetdate) = deadline.first() {
-            Some(chrono::NaiveDate::parse_from_str(targetdate, "%Y-%m-%d")?)
-        } else {
-            None
-        };
+    let deadline = make_time(&args.deadline)?;
+    let scheduled = make_time(&args.scheduled)?;
 
-        let naive_time: Option<NaiveTime> = if let Some(targettime) = deadline.get(1) {
-            Some(chrono::NaiveTime::parse_from_str(targettime, "%H:%M")?)
-        } else {
-            None
-        };
-
-        let naive_date: Option<NaiveDateTime> =
-            if let (Some(time), Some(date)) = (naive_time, naive_date) {
-                Some(date.and_time(time))
-            } else {
-                naive_date.map(|date| date.and_hms_opt(0, 0, 0).unwrap())
-            };
-
-        let local_date: Option<DateTime<Local>> =
-            naive_date.map(|date| Local.from_local_datetime(&date).unwrap());
-
-        local_date.map(|date| date.to_utc())
-    } else {
-        None
-    };
     let task = data::Task {
         id: category_info_result.latest_todo_id + 1,
         state: args.status.clone(),
         task: args.task.clone(),
         deadline,
+        scheduled,
     };
     let task_json = serde_json::to_string_pretty(&task.clone())?;
 
