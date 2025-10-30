@@ -1,4 +1,5 @@
 use crate::{config, handler::data, helpers::errors::CommonErrors};
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -162,4 +163,49 @@ pub fn get_categories(
     }
 
     Ok(data)
+}
+
+pub fn make_time_utc(
+    time_vec: &Option<Vec<String>>,
+) -> Result<Option<DateTime<Utc>>, Box<dyn std::error::Error>> {
+    if let Some(time) = time_vec {
+        let naive_date: Option<NaiveDate> = if let Some(targetdate) = time.first() {
+            Some(chrono::NaiveDate::parse_from_str(targetdate, "%Y-%m-%d")?)
+        } else {
+            None
+        };
+
+        let naive_time: Option<NaiveTime> = if let Some(targettime) = time.get(1) {
+            Some(chrono::NaiveTime::parse_from_str(targettime, "%H:%M")?)
+        } else {
+            None
+        };
+
+        let naive_date: Option<NaiveDateTime> =
+            if let (Some(time), Some(date)) = (naive_time, naive_date) {
+                Some(date.and_time(time))
+            } else {
+                naive_date.map(|date| date.and_hms_opt(0, 0, 0).unwrap())
+            };
+
+        let local_date: Option<DateTime<Local>> =
+            naive_date.map(|date| Local.from_local_datetime(&date).unwrap());
+
+        let utc_date = local_date.map(|date| date.to_utc());
+
+        let result = if let Some(date) = utc_date {
+            if naive_time.is_none() {
+                let blank_time = NaiveTime::from_hms_opt(0, 0, 0).unwrap();
+                let result = date.with_time(blank_time).unwrap();
+                Some(result)
+            } else {
+                utc_date
+            }
+        } else {
+            None
+        };
+        Ok(result)
+    } else {
+        Ok(None)
+    }
 }

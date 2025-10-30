@@ -15,6 +15,14 @@ pub struct SetArgs {
     #[arg(short, long)]
     // State to change task to
     state: Option<data::TaskState>,
+
+    #[arg(short, long, value_delimiter = ' ', num_args = 1..4)]
+    /// Deadline to change task to
+    deadline: Option<Vec<String>>,
+
+    #[arg(short = 'S', long, value_delimiter = ' ', num_args = 1..4)]
+    /// Scheduled time to change task to
+    scheduled: Option<Vec<String>>,
 }
 
 pub fn set(
