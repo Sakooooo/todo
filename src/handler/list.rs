@@ -74,6 +74,13 @@ fn output_list(
         };
         println!();
     }
+    let remaining = todos.len() - selected_todos.len();
+    if remaining > 0 {
+        println!(
+            "      {REMAINING}and {} more...{REMAINING:#}",
+            todos.len() - selected_todos.len()
+        );
+    }
     Ok(())
 }
 

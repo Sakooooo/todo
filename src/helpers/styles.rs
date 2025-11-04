@@ -13,3 +13,4 @@ pub const DEADLINE: Style = Style::new()
 pub const SCHEDULED: Style = Style::new()
     .bold()
     .fg_color(Some(Color::Ansi(AnsiColor::Blue)));
+pub const REMAINING: Style = Style::new().dimmed();
