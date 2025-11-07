@@ -75,7 +75,7 @@ enum Commands {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut directory_config = config::read_directory_config()?;
-    // println!("{:?}", config);
+    let mut config = config::read_config()?;
 
     let cli = Cli::parse();
 

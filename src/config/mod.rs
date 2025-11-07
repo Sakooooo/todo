@@ -14,6 +14,26 @@ pub struct Directory {
     pub path: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct WatchConfig {
+    pub remind_min_before: Option<u32>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Config {
+    pub watch: Option<WatchConfig>,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            watch: Some(WatchConfig {
+                remind_min_before: Some(10),
+            }),
+        }
+    }
+}
+
 pub fn read_directory_config() -> Result<DirectoryConfig, Box<dyn std::error::Error>> {
     let xdg_dirs = xdg::BaseDirectories::with_prefix("todo");
 
@@ -48,4 +68,40 @@ pub fn save_directory_config(
 
     directory_config_file.write_all(&config_toml)?;
     Ok(())
+}
+
+pub fn save_config(config: &mut Config) -> Result<(), Box<dyn std::error::Error>> {
+    let converted_toml = toml::to_string(&config)?;
+    let config_toml = converted_toml.into_bytes();
+
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("todo");
+
+    let config_path = xdg_dirs.place_config_file("directories.toml")?;
+
+    let mut config_file = File::create(&config_path)?;
+
+    config_file.write_all(&config_toml)?;
+    Ok(())
+}
+
+pub fn read_config() -> Result<Config, Box<dyn std::error::Error>> {
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("todo");
+
+    let directory_config_path = xdg_dirs.place_config_file("config.toml")?;
+
+    if !directory_config_path.is_file() {
+        println!(
+            "Creating config with defaults at {}",
+            directory_config_path.to_str().unwrap()
+        );
+        File::create(&directory_config_path)?;
+        let mut default_config: Config = Config::default();
+        save_config(&mut default_config)?;
+    }
+
+    let directory_config = std::fs::read_to_string(&directory_config_path)?;
+
+    let data: Config = toml::from_str(&directory_config)?;
+
+    Ok(data)
 }
