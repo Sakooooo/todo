@@ -85,7 +85,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Add(args) => handler::add::new(args, &mut directory_config)?,
         Commands::Set(args) => handler::set::set(args, &mut directory_config)?,
         Commands::Rm(args) => handler::rm::rm(args, &mut directory_config)?,
-        Commands::Watch(args) => handler::watch::watch(args, &mut directory_config)?,
+        Commands::Watch(args) => handler::watch::watch(args, &mut directory_config, &mut config)?,
     }
 
     Ok(())

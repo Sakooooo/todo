@@ -105,7 +105,7 @@ pub fn list(
         println!("{BOLD}{}{BOLD:#}", directory.unwrap().name);
         let categories = helpers::get_categories(directory.unwrap())?;
         for category in categories.into_iter() {
-            let todos = helpers::get_todos(directory.unwrap(), category.clone())?;
+            let todos = helpers::get_todos(directory.unwrap(), Some(category.clone()))?;
             output_list(todos, args.count as usize, category)?;
         }
     } else if directory_config.task_folder.is_some() {
@@ -114,7 +114,7 @@ pub fn list(
             println!("  {BOLD}{}{BOLD:#}", folder.name);
             let categories = helpers::get_categories(folder)?;
             for category in categories.into_iter() {
-                let todos = helpers::get_todos(folder, category.clone())?;
+                let todos = helpers::get_todos(folder, Some(category.clone()))?;
                 output_list(todos, args.count as usize, category)?;
             }
         }

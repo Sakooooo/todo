@@ -12,7 +12,7 @@ pub const SCHEMA_VERSION: f64 = 1.0;
 
 pub fn get_todos(
     directory: &config::Directory,
-    category: String,
+    target_category: Option<String>,
 ) -> Result<Vec<data::Task>, Box<dyn std::error::Error>> {
     let target = Path::new(&directory.path);
     let paths = fs::read_dir(target)?;
@@ -33,11 +33,28 @@ pub fn get_todos(
 
     let mut tasks: Vec<data::Task> = vec![];
 
-    for found_category in valid_directories.into_iter() {
-        let path = Path::new(&found_category);
-        let files = fs::read_dir(path)?;
+    if let Some(category) = target_category {
+        for found_category in valid_directories.into_iter() {
+            let path = Path::new(&found_category);
+            let files = fs::read_dir(path)?;
 
-        if found_category.file_name().unwrap().to_string_lossy() == category {
+            if found_category.file_name().unwrap().to_string_lossy() == category {
+                for file in files.into_iter() {
+                    if file.as_ref().unwrap().file_name().to_str().unwrap() != "category.json"
+                        && file.as_ref().unwrap().path().extension().unwrap() == "json"
+                    {
+                        let json_data = fs::read_to_string(file.unwrap().path())?;
+                        let data: data::Task = serde_json::from_str(&json_data)?;
+                        tasks.push(data);
+                    }
+                }
+            }
+        }
+    } else {
+        for directory in valid_directories.into_iter() {
+            let path = Path::new(&directory);
+            let files = fs::read_dir(path)?;
+
             for file in files.into_iter() {
                 if file.as_ref().unwrap().file_name().to_str().unwrap() != "category.json"
                     && file.as_ref().unwrap().path().extension().unwrap() == "json"
