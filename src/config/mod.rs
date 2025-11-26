@@ -16,7 +16,8 @@ pub struct Directory {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WatchConfig {
-    pub remind_min_before: Option<u32>,
+    /// Duration to send a notification before, such as 10m or 30m
+    pub remind_before: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -28,7 +29,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             watch: Some(WatchConfig {
-                remind_min_before: Some(10),
+                remind_before: "10m".to_string(),
             }),
         }
     }

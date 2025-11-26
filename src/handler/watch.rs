@@ -1,9 +1,10 @@
-use chrono::Local;
+use chrono::{Local, TimeDelta};
 use notify_rust::Notification;
+use parse_duration::parse;
 
 use crate::{
     config,
-    handler::data::Task,
+    handler::data::{Task, TaskState},
     helpers::{get_categories, get_todos, make_time_utc},
 };
 
@@ -22,8 +23,18 @@ pub fn watch(
     directory_config: &mut config::DirectoryConfig,
     config: &mut config::Config,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    dbg!(config);
+    dbg!(&config);
     let mut monitored_tasks: Vec<WatchedTasks> = vec![];
+
+    let watch_config = if let Some(watch_config) = &config.watch {
+        watch_config
+    } else {
+        panic!("No watch configuration!");
+    };
+
+    let remind_before = parse(&watch_config.remind_before)?;
+    dbg!(remind_before);
+
     if let Some(directories) = &directory_config.task_folder {
         dbg!(directories);
         for directory in directories {
@@ -42,14 +53,23 @@ pub fn watch(
 
     for task in monitored_tasks {
         for todo in task.todos {
-            if let Some(schedule) = todo.scheduled {
-                dbg!(schedule);
-                if schedule.time().to_string() != "00:00:00" {
-                    let distance = Local::now() - schedule.with_timezone(&Local);
+            if todo.state == TaskState::Todo
+                && let Some(schedule) = todo.scheduled
+                && schedule.time().to_string() != "00:00:00"
+            {
+                if schedule < Local::now() {
+                    let distance = (Local::now() - schedule.with_timezone(&Local)).to_std()?;
                     dbg!(schedule);
                     dbg!(distance);
-                };
-            }
+                    if distance < remind_before {
+                        println!("Triggered!");
+                    } else {
+                        println!("Okay...");
+                    };
+                } else {
+                    println!("test");
+                }
+            };
         }
     }
     loop {
